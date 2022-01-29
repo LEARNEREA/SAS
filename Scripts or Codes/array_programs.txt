@@ -1,0 +1,17 @@
+
+/*=================Finding max and min units sold====================*/
+data max_min_sales;
+set mylib.card_sales;
+
+array sales(12) JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC;
+
+/* array sales(*) _numeric_; */
+
+max_unit_sold = max(of sales(*));
+min_unit_sold = min(of sales(*));
+
+run;
+
+proc print data=mylib.card_sales; run;
+proc print data=max_min_sales; run;
+
