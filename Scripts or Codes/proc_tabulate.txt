@@ -1,0 +1,20 @@
+proc print data=sashelp.cars(obs=5); run;
+
+proc tabulate data=sashelp.cars;
+class origin type drivetrain;
+var msrp invoice;
+tables origin*type, drivetrain*msrp*(n="count" sum="total msrp")/box="origin";
+run;
+
+
+ods excel file="/home/u49504224/excelFiles/cars_summary.xlsx"options(embedded_titles="yes"
+start_at="1,1"
+sheet_name="Sheet1") ;
+proc tabulate data=sashelp.cars;
+class origin type drivetrain;
+var msrp invoice;
+tables	origin=""*type="" all='Grand Total'
+		,drivetrain*msrp*(n="count" sum="total msrp") 
+		 drivetrain*invoice*(mean);
+run;
+ods excel close;
