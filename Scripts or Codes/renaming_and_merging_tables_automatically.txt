@@ -1,0 +1,38 @@
+
+proc print data=la.jan; run;
+proc print data=la.feb; run;
+
+%macro merge_tables(lib, data1, data2, mergekey);
+
+/*create rename string  */
+data variables;
+set sashelp.vcolumn(keep=libname memname name);
+
+if upcase(name) ne %upcase("&mergekey.") then do;
+	rename_string = compress(name||"="||name||"_"||memname);
+end;
+where upcase(memname) = %upcase("&data2");
+run;
+
+/*store that in macro variables  */
+proc sql;
+	select distinct rename_string into :rename_strings separated by " " from variables;
+quit;
+
+/*rename the variables  */
+data data3;
+set &lib..&data2.;
+	rename &rename_strings.;
+run;
+proc print data=data3; run;
+
+/*merge the tables  */
+data merged;
+merge &lib..&data1
+		data3;
+by &mergekey.;
+run;
+proc print data=merged; run;
+
+%mend;
+%merge_tables(la,jan,feb,type);
