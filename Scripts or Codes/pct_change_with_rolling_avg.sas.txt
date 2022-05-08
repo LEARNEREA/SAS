@@ -1,0 +1,46 @@
+LIBNAME LA "/home/u49504224/learnerea";	
+
+proc print data=la.stocks_sample; run;
+
+%macro rolling_avg;
+
+proc sort data=la.stocks_sample; by stock; run;
+data testing;
+set la.stocks_sample;
+
+	%do i = 1 %to 6;
+		open&i. = lag&i.(open);
+	%end;
+	
+	array lag_var(*) open1-open6;
+	
+	by stock;
+	
+	if first.stock then do;
+		count = 1;
+		counter = 1;
+	end;
+	
+	else do;
+		counter+1;
+	end;
+	
+	do j = count to dim(lag_var);
+		lag_var(j) = .;
+	end;
+		count+1;	
+		
+	open_sum = sum(of open1-open6);
+	rolling_avg = open_sum/6;
+	pct_diff_6mnth_avg = (rolling_avg - open)/rolling_avg;
+		
+	if counter <= 6 then do;
+		open_sum = .;
+		rolling_avg = .;
+		pct_diff_6mnth_avg = .;	
+	end;
+	keep stock date open pct_diff_6mnth_avg;
+run;
+%mend;
+%rolling_avg;
+proc print data=testing; run;
